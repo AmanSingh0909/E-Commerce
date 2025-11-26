@@ -1,23 +1,22 @@
 const express = require('express')
 const app = express()
-const bodyParser = require('body-parser')
 const morgan = require('morgan')
 const mongoose = require('mongoose')
 require('dotenv').config()
 const cors = require('cors')
 const authJwt = require('./helpers/jwt')
-const errorHandler = require('./helpers/error-handler')
+const errorHandler = require('./helpers/error-handlers')
 
 app.use(cors())
-app.options('*', cors())
+//app.options('*', cors())
 
 
 
 //middleware
-app.use(bodyParser.json())
+app.use(express.json())
 app.use(morgan('tiny'))
-app.use(authJwt())
-app.use(errorHandler)
+// app.use(authJwt())
+// app.use(errorHandler)
 
 
 //Routers
@@ -30,8 +29,8 @@ const api = process.env.API_URL
 
 app.use(`${api}/products`, productsRouter)
 app.use(`${api}/categories`, categoriesRouter)
-app.use(`${api}/users`, usersRouter)
-app.use(`${api}/orders`, ordersRouter)
+// app.use(`${api}/users`, usersRouter)
+// app.use(`${api}/orders`, ordersRouter)
 
 
 
