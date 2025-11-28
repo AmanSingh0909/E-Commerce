@@ -15,8 +15,8 @@ app.use(cors())
 //middleware
 app.use(express.json())
 app.use(morgan('tiny'))
-// app.use(authJwt())
-// app.use(errorHandler)
+app.use(authJwt())
+app.use(errorHandler)
 
 
 //Routers
@@ -29,7 +29,7 @@ const api = process.env.API_URL
 
 app.use(`${api}/products`, productsRouter)
 app.use(`${api}/categories`, categoriesRouter)
-// app.use(`${api}/users`, usersRouter)
+app.use(`${api}/users`, usersRouter)
 // app.use(`${api}/orders`, ordersRouter)
 
 
