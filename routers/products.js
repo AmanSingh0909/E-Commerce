@@ -152,5 +152,16 @@ router.get('/get/count', async (req, res) => {
   }
 });
 
+router.get('/get/featured', async (req, res) => {
+  try {
+    const products = await Product.find({ isFeatured: true });  // Counts all products
+
+    res.status(200).json({ success: true, products });
+
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 
 module.exports = router
