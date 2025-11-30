@@ -11,7 +11,6 @@ function authJwt() {
             { url: `${api}/products`, method: ['GET', 'OPTIONS'] },
             `${api}/users/login`,
             `${api}/users/register`,
-
         ]
     })
 }
