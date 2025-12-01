@@ -45,6 +45,7 @@ router.post('/', async (req, res) => {
     res.send(user);
 })
 
+// user login
 router.post('/login', async (req, res) => {
     const user = await User.findOne({ email: req.body.email });
     const secret = process.env.secret;  
@@ -87,6 +88,7 @@ router.post('/register', async (req, res) => {
     res.send(user);
 })
 
+// Get user count
 router.get('/get/count', async (req, res) => {
   try {
     const userCount = await User.countDocuments();  // Counts all products
@@ -98,6 +100,7 @@ router.get('/get/count', async (req, res) => {
   }
 });
 
+// Delete user
 router.delete("/:id", async (req, res) => {
   try {
     const user = await User.findByIdAndDelete(req.params.id);
