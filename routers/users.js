@@ -87,4 +87,35 @@ router.post('/register', async (req, res) => {
     res.send(user);
 })
 
+router.get('/get/count', async (req, res) => {
+  try {
+    const userCount = await User.countDocuments();  // Counts all products
+
+    res.status(200).json({ success: true, userCount });
+
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+router.delete("/:id", async (req, res) => {
+  try {
+    const user = await User.findByIdAndDelete(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    res.status(200).json({ success: true, message: "User deleted successfully" });
+
+  } catch (error) {
+    console.log("DELETE ERROR =>", error);
+    res.status(500).json({
+      success: false,
+      message: "Server Error",
+      error: error.message
+    });
+  }
+});
+
 module.exports = router;
