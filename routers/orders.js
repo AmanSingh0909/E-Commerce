@@ -21,7 +21,7 @@ router.get(`/`, async (req, res) => {
 router.get(`/:id`, async (req, res) => {
     const order = await Order.findById(req.params.id)
         .populate('user', 'name')
-        .populate({ path: 'orderItems', populate: 'product' })
+        .populate({ path: 'orderItems', populate: 'product', populate: 'category' })
     if (!order) {
         res.status(500).json({
             success: false
@@ -43,18 +43,22 @@ router.post('/', async (req, res) => {
     }));
 
     // 2. (Optional but better) calculate total price from order items
-    /*
+
     const totalPrices = await Promise.all(
         orderItemsIds.map(async (orderItemId) => {
             const orderItem = await OrderItem.findById(orderItemId).populate(
                 "product",
                 "price"
             );
-            return orderItem.product.price * orderItem.quantity;
+            const totalPrice = orderItem.product.price * orderItem.quantity;
+            return (totalPrice)
         })
     );
-    const totalPrice = totalPrices.reduce((acc, curr) => acc + curr, 0);
-    */
+
+    const totalPrice = totalPrices.reduce((a, b) => a + b, 0)
+
+    console.log(totalPrices);
+
 
     let order = new Order({
         orderItems: orderItemsIds,
@@ -65,7 +69,7 @@ router.post('/', async (req, res) => {
         country: req.body.country,
         phone: req.body.phone,
         status: req.body.status,
-        totalPrice: req.body.totalPrice,
+        totalPrice: totalPrice,
         user: req.body.user,
     });
     order = await order.save();
@@ -109,5 +113,67 @@ router.delete("/:id", async (req, res) => {
         });
     }
 });
+
+router.get('/get/totalsales', async (req, res) => {
+    const totalSales = await Order.aggregate([
+        { $group: { _id: null, totalsales: { $sum: '$totalPrice' } } }
+    ])
+
+    if (!totalSales) {
+        return res.status(400).send('The order sales cannot be generated')
+    }
+
+    res.send({ totalsales: totalSales.pop().totalsales })
+})
+
+router.get('/get/count', async (req, res) => {
+    try {
+        const orderCount = await Order.countDocuments();  // Counts all products
+
+        res.status(200).json({ success: true, orderCount });
+
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+router.get('/get/userorders/:userid', async (req, res) => {
+    try {
+        const userId = req.params.userid;  // FIXED
+
+
+        const userorderList = await Order.find({ user: userId })
+            .populate({
+                path: 'orderItems',
+                populate: {
+                    path: 'product',
+                    populate: 'category'
+                }
+            })
+            .sort({ dateOrdered: -1 });
+
+        if (!userorderList) {
+            return res.status(404).json({
+                success: false,
+                message: "No orders found for this user"
+            });
+        }
+
+        res.send(userorderList);
+        // console.log(userorderList);
+        // const orders = await Order.find();
+        // console.log("All orders: ", orders);
+
+        // console.log("UserID param:", req.params.userid);
+
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+
+
 
 module.exports = router;
