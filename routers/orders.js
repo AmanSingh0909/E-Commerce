@@ -3,6 +3,7 @@ const router = express.Router();
 const Order = require('../models/order');
 const OrderItem = require('../models/order-item');
 const { populate } = require('dotenv');
+const orderItem = require('../models/order-item');
 
 
 // Get Orders
@@ -86,25 +87,27 @@ router.put(`/:id`, async (req, res) => {
     res.send(order)
 })
 
-// Delete corder
+// Delete order
 router.delete("/:id", async (req, res) => {
-  try {
-    const order = await Order.findByIdAndDelete(req.params.id);
-
-    if (!order) {
-      return res.status(404).json({ success: false, message: "Order not found" });
+    try {
+        await Order.findByIdAndDelete(req.params.id).then(async order => {
+            if (order) {
+                await order.orderItems.map(async orderItem => {
+                    await OrderItem.findByIdAndDelete(orderItem)
+                })
+                return res.status(404).json({ success: true, message: "Order deleted successfully" });
+            } else {
+                res.status(200).json({ success: false, message: "order not found" });
+            }
+        })
+    } catch (error) {
+        console.log("DELETE ERROR =>", error);
+        res.status(500).json({
+            success: false,
+            message: "Server Error",
+            error: error.message
+        });
     }
-
-    res.status(200).json({ success: true, message: "Order deleted successfully" });
-
-  } catch (error) {
-    console.log("DELETE ERROR =>", error);
-    res.status(500).json({
-      success: false,
-      message: "Server Error",
-      error: error.message
-    });
-  }
 });
 
 module.exports = router;
