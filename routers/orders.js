@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const  Order  = require('../models/order');
-const  OrderItem  = require('../models/order-item');
+const Order = require('../models/order');
+const OrderItem = require('../models/order-item');
+const { populate } = require('dotenv');
 
 
 // Get Orders
@@ -13,6 +14,19 @@ router.get(`/`, async (req, res) => {
         })
     }
     res.send(orderList)
+})
+
+// Get order by id
+router.get(`/:id`, async (req, res) => {
+    const order = await Order.findById(req.params.id)
+        .populate('user', 'name')
+        .populate({ path: 'orderItems', populate: 'product' })
+    if (!order) {
+        res.status(500).json({
+            success: false
+        })
+    }
+    res.send(order)
 })
 
 // Create new order
