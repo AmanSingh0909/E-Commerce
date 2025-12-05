@@ -158,7 +158,6 @@ router.get('/get/userorders/:userid', async (req, res) => {
                 message: "No orders found for this user"
             });
         }
-
         res.send(userorderList);
         // console.log(userorderList);
         // const orders = await Order.find();
