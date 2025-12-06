@@ -4,35 +4,53 @@ const express = require('express')
 const router = express.Router()
 const mongoose = require('mongoose')
 
+const getProductController = async (req, res) => {
+  try {
+    const productList = await Product.find().populate('category');
 
+    res.status(200).json({
+      success: true,
+      count: productList.length,
+      products: productList
+    });
 
-router.get(`/`, async (req, res) => {
-  const productList = await Product.find().populate('category')
-  res.send(productList)
-})
-
-router.post(`/count`, (req, res) => {
-  const product = new Product({
-    name: req.body.name,
-    image: req.body.image,
-    countInStock: req.body.countInStock
-  })
-
-  product.save().then((createdProduct) => {
-    res.status(201).send(createdProduct)
-  }).catch((err) => {
+  } catch (err) {
     res.status(500).json({
-      error: err,
-      success: false
-    })
-  })
-})
+      success: false,
+      message: "Failed to fetch products",
+      error: err.message
+    });
+  }
+};
 
-router.post('/', async (req, res) => {
+
+const countProductController = async (req, res) => {
+  try {
+    const product = new Product({
+      name: req.body.name,
+      image: req.body.image,
+      countInStock: req.body.countInStock
+    });
+
+    const createdProduct = await product.save();
+
+    res.status(201).json({
+      success: true,
+      product: createdProduct
+    });
+
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      error: err.message
+    });
+  }
+};
+
+
+const createProductController = async (req, res) => {
   try {
     //console.log("CATEGORY ID SENT =>", req.body.category);
-
-
     // 1. Validate category
     const category = await Category.findById(req.body.category);
     if (!category) {
@@ -58,18 +76,15 @@ router.post('/', async (req, res) => {
     // 3. Save product
     product = await product.save();
     // console.log('SAVED PRODUCT =>', product);
-
     if (!product) {
       return res.status(500).send('The product cannot be created!');
     }
-
     // 4. Return full product
     return res.status(201).json({
       success: true,
       message: 'Product created successfully',
       product,
     });
-
   } catch (err) {
     console.error('PRODUCT CREATE ERROR =>', err);
     return res.status(500).json({
@@ -78,16 +93,33 @@ router.post('/', async (req, res) => {
       error: err.message,
     });
   }
-});
+};
 
-router.get(`/:id`, async (req, res) => {
-  const product = await Product.findById(req.params.id).populate('category')
+const getProductByidController = async (req,res) => {
+  try {
+    const product = await Product.findById(req.params.id).populate('category');
 
-  if (!product) {
-    res.status(500).json({ success: false })
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found"
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      product: product
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+      error: error.message
+    });
   }
-  res.send(product)
-})
+};
+
 
 router.put('/:id', async (req, res) => {
   if (!mongoose.isValidObjectId(req.params.id)) {
@@ -164,4 +196,4 @@ router.get('/get/featured', async (req, res) => {
 });
 
 
-module.exports = router
+module.exports = { createProductController, countProductController, getProductController, getProductByidController }

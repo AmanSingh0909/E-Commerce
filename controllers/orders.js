@@ -2,8 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Order = require('../models/order');
 const OrderItem = require('../models/order-item');
-const { populate } = require('dotenv');
-const orderItem = require('../models/order-item');
+
 
 
 // Get Orders
