@@ -95,7 +95,7 @@ const createProductController = async (req, res) => {
   }
 };
 
-const getProductByidController = async (req,res) => {
+const getProductByidController = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id).populate('category');
 
@@ -120,40 +120,54 @@ const getProductByidController = async (req,res) => {
   }
 };
 
+//Update Product by id
+const updateProductByIdController = async (req, res) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).send('Invalid Product Id');
+    }
+    // Validate category
+    if (req.body.category) {
+      const category = await Category.findById(req.body.category);
+      if (!category) {
+        return res.status(400).send('Invalid Category');
+      }
+    }
+    const updatedProduct = await Product.findByIdAndUpdate(
+      req.params.id,
+      {
+        name: req.body.name,
+        description: req.body.description,
+        richDescription: req.body.richDescription,
+        image: req.body.image,
+        images: req.body.images,
+        brand: req.body.brand,
+        price: req.body.price,
+        category: req.body.category,
+        countInStock: req.body.countInStock,
+        rating: req.body.rating,
+        numReviews: req.body.numReviews,
+        isFeatured: req.body.isFeatured,
+      },
+      { new: true }
 
-router.put('/:id', async (req, res) => {
-  if (!mongoose.isValidObjectId(req.params.id)) {
-    return res.status(400).send('Invalid Product Id');
+    );
+    if (!updatedProduct) {
+      return res.status(404).send('Product not found!');
+    }
+    res.status(200).send(updatedProduct);
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Something went wrong while updating the product',
+      error: error.message,
+    })
   }
-  const category = await Category.findById(req.body.category);
-  if (!category) {
-    return res.status(400).send('Invalid Category');
-  }
-  const product = await Product.findByIdAndUpdate(
-    req.params.id,
-    {
-      name: req.body.name,
-      description: req.body.description,
-      richDescription: req.body.richDescription,
-      image: req.body.image,
-      images: req.body.images,
-      brand: req.body.brand,
-      price: req.body.price,
-      category: req.body.category,
-      countInStock: req.body.countInStock,
-      rating: req.body.rating,
-      numReviews: req.body.numReviews,
-      isFeatured: req.body.isFeatured,
-    },
-    { new: true }
-  );
-  if (!product)
-    return res.status(500).send('The product cannot be updated!');
-  res.send(product);
-});
+}
 
 // Delete category
-router.delete("/:id", async (req, res) => {
+const deleteProductController = async (req, res) => {
   try {
     const product = await Product.findByIdAndDelete(req.params.id);
 
@@ -169,11 +183,12 @@ router.delete("/:id", async (req, res) => {
       success: false,
       message: "Server Error",
       error: error.message
-    });
+    })
   }
-});
+}
 
-router.get('/get/count', async (req, res) => {
+// Get count of product
+const GetCountProductController = async (req, res) => {
   try {
     const productCount = await Product.countDocuments();  // Counts all products
 
@@ -182,9 +197,10 @@ router.get('/get/count', async (req, res) => {
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
-});
+}
 
-router.get('/get/featured', async (req, res) => {
+// Get Featured of Product
+const getfeaturedProductController = async (req, res) => {
   try {
     const products = await Product.find({ isFeatured: true });  // Counts all products
 
@@ -193,7 +209,7 @@ router.get('/get/featured', async (req, res) => {
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
-});
+}
 
 
-module.exports = { createProductController, countProductController, getProductController, getProductByidController }
+module.exports = { createProductController, countProductController, getProductController, getProductByidController, updateProductByIdController, deleteProductController, GetCountProductController, getfeaturedProductController }

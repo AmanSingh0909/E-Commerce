@@ -1,5 +1,5 @@
 const express  = require('express')
-const { createProductController, countProductController, getProductController, getProductByidController } = require('../controllers/products')
+const { createProductController, countProductController, getProductController, getProductByidController, updateProductByIdController, deleteProductController, GetCountProductController, getfeaturedProductController } = require('../controllers/products')
 
 const router = express.Router()
 
@@ -15,5 +15,16 @@ router.get(`/`, getProductController)
 // Get Product by id
 router.get('/:id', getProductByidController)
 
+// Update Product by id'
+router.put('/:id', updateProductByIdController)
+
+// delete Product by id
+router.delete("/:id", deleteProductController)
+
+// Get COunt of Products
+router.get('/get/count', GetCountProductController)
+
+// Get featured of Products
+router.get('/get/featured', getfeaturedProductController)
 
 module.exports = router
