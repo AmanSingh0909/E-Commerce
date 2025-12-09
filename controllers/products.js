@@ -1,7 +1,5 @@
 const Category = require('../models/category')
 const Product = require('../models/product')
-const express = require('express')
-const router = express.Router()
 const mongoose = require('mongoose')
 
 const getProductController = async (req, res) => {
