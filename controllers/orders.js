@@ -1,12 +1,12 @@
 const express = require('express');
-const router = express.Router();
 const Order = require('../models/order');
 const OrderItem = require('../models/order-item');
 
 
 
+
 // Get Orders
-router.get(`/`, async (req, res) => {
+const getordersController = async (req, res) => {
     const orderList = await Order.find().populate('user', 'name').sort({ 'dateOrdered': -1 });
     if (!orderList) {
         res.status(500).json({
@@ -14,10 +14,10 @@ router.get(`/`, async (req, res) => {
         })
     }
     res.send(orderList)
-})
+}
 
 // Get order by id
-router.get(`/:id`, async (req, res) => {
+const getOrdersbyIdController = async (req, res) => {
     const order = await Order.findById(req.params.id)
         .populate('user', 'name')
         .populate({ path: 'orderItems', populate: 'product', populate: 'category' })
@@ -27,11 +27,10 @@ router.get(`/:id`, async (req, res) => {
         })
     }
     res.send(order)
-})
+}
 
 // Create new order
-router.post('/', async (req, res) => {
-
+const createOrderController = async (req, res) => {
     const orderItemsIds = await Promise.all(req.body.orderItems.map(async orderItem => {
         let newOrderItem = new OrderItem({
             quantity: orderItem.quantity,
@@ -76,9 +75,10 @@ router.post('/', async (req, res) => {
     if (!order)
         return res.status(404).send('The order cannot be created!');
     res.send(order);
-});
+}
 
-router.put(`/:id`, async (req, res) => {
+// update orders by id
+const updateOrdersByIdController = async (req, res) => {
     const order = await Order.findByIdAndUpdate(req.params.id, {
         status: req.body.status
     },
@@ -88,10 +88,10 @@ router.put(`/:id`, async (req, res) => {
     if (!order)
         return res.status(400).send('the order cannot be created')
     res.send(order)
-})
+}
 
 // Delete order
-router.delete("/:id", async (req, res) => {
+const deleteOrdersByIdController = async (req, res) => {
     try {
         await Order.findByIdAndDelete(req.params.id).then(async order => {
             if (order) {
@@ -111,9 +111,10 @@ router.delete("/:id", async (req, res) => {
             error: error.message
         });
     }
-});
+}
 
-router.get('/get/totalsales', async (req, res) => {
+// get totalsales
+const getOrderTotalSalesController = async (req, res) => {
     const totalSales = await Order.aggregate([
         { $group: { _id: null, totalsales: { $sum: '$totalPrice' } } }
     ])
@@ -123,9 +124,10 @@ router.get('/get/totalsales', async (req, res) => {
     }
 
     res.send({ totalsales: totalSales.pop().totalsales })
-})
+}
 
-router.get('/get/count', async (req, res) => {
+// get order counts
+const getOrdesCountsController = async (req, res) => {
     try {
         const orderCount = await Order.countDocuments();  // Counts all products
 
@@ -134,9 +136,10 @@ router.get('/get/count', async (req, res) => {
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }
-});
+}
 
-router.get('/get/userorders/:userid', async (req, res) => {
+// get userorders by user id
+const getUserOrdersByUserIdController = async (req, res) => {
     try {
         const userId = req.params.userid;  // FIXED
 
@@ -169,9 +172,7 @@ router.get('/get/userorders/:userid', async (req, res) => {
         console.error(error);
         res.status(500).json({ success: false, error: error.message });
     }
-});
+}
 
 
-
-
-module.exports = router;
+module.exports = { getordersController, getOrdersbyIdController, getOrderTotalSalesController, createOrderController, getOrdesCountsController, getUserOrdersByUserIdController, updateOrdersByIdController, deleteOrdersByIdController}
