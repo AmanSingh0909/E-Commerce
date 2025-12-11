@@ -6,27 +6,26 @@ const jwt = require('jsonwebtoken');
 
 
 // Get Users
-router.get(`/`, async (req, res) => {
-
+const getUsersController = async (req, res) => {
     const userList = await User.find().select('-passwordHash');
 
     if (!userList) {
         res.status(500).json({ success: false });
     }
     res.send(userList);
-})
+}
 
 //Get User by ID
-router.get('/:id', async (req, res) => {
+const getusersByIdController = async (req, res) => {
     const user = await User.findById(req.params.id).select('-passwordHash');
     if (!user) {
         return res.status(500).json({ message: 'The user with the given ID was not found.' });
     }
     res.status(200).send(user);
-});
+}
 
 // Create User
-router.post('/', async (req, res) => {
+const createUsersController = async (req, res) => {
     let user = new User({
         name: req.body.name,
         email: req.body.email,
@@ -43,10 +42,10 @@ router.post('/', async (req, res) => {
     if (!user)
         return res.status(400).send('the user cannot be created!')
     res.send(user);
-})
+}
 
 // user login
-router.post('/login', async (req, res) => {
+const loginUsersController = async (req, res) => {
     const user = await User.findOne({ email: req.body.email });
     const secret = process.env.secret;  
     if (!user) {
@@ -66,10 +65,10 @@ router.post('/login', async (req, res) => {
     } else {
         res.status(400).send('Password is wrong!');
     }
-});
+}
 
 // user registration
-router.post('/register', async (req, res) => {
+const registerUserController = async (req, res) => {
     let user = new User({
         name: req.body.name,
         email: req.body.email,
@@ -86,10 +85,10 @@ router.post('/register', async (req, res) => {
     if (!user)
         return res.status(400).send('the user cannot be created!')
     res.send(user);
-})
+}
 
 // Get user count
-router.get('/get/count', async (req, res) => {
+const getUserCountController = async (req, res) =>{
   try {
     const userCount = await User.countDocuments();  // Counts all products
 
@@ -98,10 +97,10 @@ router.get('/get/count', async (req, res) => {
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
-});
+}
 
 // Delete user
-router.delete("/:id", async (req, res) => {
+const deleteUserByIdController = async (req, res) => {
   try {
     const user = await User.findByIdAndDelete(req.params.id);
 
@@ -119,6 +118,6 @@ router.delete("/:id", async (req, res) => {
       error: error.message
     });
   }
-});
+}
 
-module.exports = router;
+module.exports = {getUsersController, getusersByIdController, getUserCountController, createUsersController, deleteUserByIdController, registerUserController, loginUsersController}
